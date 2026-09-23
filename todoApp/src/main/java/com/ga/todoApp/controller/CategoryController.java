@@ -4,6 +4,7 @@ import com.ga.todoApp.model.Category;
 import com.ga.todoApp.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,9 +27,14 @@ public class CategoryController {
     }
 
     @PostMapping("/categories")
-    public Category createCategory(@RequestBody Category categoryObj){
-        System.out.println("Calling create category");
-        return categoryService.createCategory(categoryObj);
+    public Category createCategory(
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("image") MultipartFile image) {
+
+        System.out.println("Calling createCategory ==> ");
+
+        return categoryService.createCategory(name, description, image);
     }
 
     @GetMapping("/category")
@@ -37,12 +43,17 @@ public class CategoryController {
         return categoryService.getCategory(id);
     }
 
-// update attempt from previous lab
-//    @PutMapping("/categories/{categoryId}")
-//    public Category updateCategory(@PathVariable("categoryId")long id, @RequestParam(value = "name") String name,
-//                                   @RequestParam(value = "description") String desc){
-//        System.out.println("Service calling updateCategory");
-//        return categoryService.updateCategory(id, name, desc);
-//    }
+    @PutMapping("/categories/{categoryId}")
+    public Category updateCategory(@PathVariable("categoryId")long id, @RequestParam(value = "name") String name,
+                                   @RequestParam(value = "description") String desc){
+        System.out.println("Service calling updateCategory");
+        return categoryService.updateCategory(id, name, desc);
+    }
+
+    @DeleteMapping("/categories/{categoryId}")
+    public Optional<Category> deleteCategory(@PathVariable(value = "categoryId") Long categoryId) {
+        System.out.println("calling deleteCategory ==>");
+        return categoryService.deleteCategory(categoryId);
+    }
 
 }

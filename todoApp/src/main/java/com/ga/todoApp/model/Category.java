@@ -17,4 +17,7 @@ public class Category {
 
     @Column
     private String description;
+
+    @Column(nullable = true)
+    private String imageUrl;
 }
