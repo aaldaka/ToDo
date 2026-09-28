@@ -3,8 +3,11 @@ package com.ga.todoApp.service;
 import com.ga.todoApp.exception.InformationExistException;
 import com.ga.todoApp.exception.InformationNotFoundException;
 import com.ga.todoApp.model.Category;
+import com.ga.todoApp.model.User;
 import com.ga.todoApp.repository.CategoryRepository;
+import com.ga.todoApp.security.MyUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +24,12 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    public static User getCurrentLoggedInUser() {
+        MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userDetails.getUser();
+    }
+
 
     private final String UPLOAD_DIR = "uploads/";
 
@@ -75,38 +84,42 @@ public class CategoryService {
             throw new RuntimeException("Could not save image", e);
         }
 
+        newCategory.setUser(getCurrentLoggedInUser()); //added
         return categoryRepository.save(newCategory);
     }
 
     public List<Category> getCategories(){
         System.out.println("Calling getCategories");
-        return categoryRepository.findAll();
+        return categoryRepository.findByUserId(getCurrentLoggedInUser().getId());
     }
 
-    public Optional<Category> getCategory(Long id){
+    public Optional<Category> getCategory(Long categoryId){
         System.out.println("Service calling getCategory");
-        return categoryRepository.findById(id);
-    }
-
-    public Category updateCategory(long id, String name, String desc){
-        System.out.println("Service calling updateCategory");
-        Optional<Category> cat = categoryRepository.findById(id);
-
-        if(cat.isEmpty()){
-            throw new InformationNotFoundException("Category: "+ id + " doesnt exist.");
-        }else{
-            Category cate = cat.get();
-            cate.setName(name);
-            cate.setDescription(desc);
-            return categoryRepository.save(cate);
+        Category category = categoryRepository.findByIdAndUserId(categoryId, CategoryService.getCurrentLoggedInUser().getId());
+        if (category == null){
+            throw new InformationNotFoundException("Category with that ID doesnt exist");
         }
+        return categoryRepository.findById(categoryId);
     }
 
-    public Optional<Category> deleteCategory(Long id){
-        System.out.println("Service calling deleteCategory ==>");
-        Optional<Category> cat = categoryRepository.findById(id);
+    public Category updateCategory(Long id, Category categoryObj){
+        System.out.println("Service calling updateCategory");
+        Category cat = categoryRepository.findByIdAndUserId(id, getCurrentLoggedInUser().getId());
 
-        if(cat.isEmpty()){
+        if (cat == null){
+            throw new InformationNotFoundException("Category with that ID doesnt exist.");
+        }
+            cat.setName(categoryObj.getName());
+            cat.setDescription(categoryObj.getDescription());
+            return categoryRepository.save(cat);
+
+    }
+
+    public Category deleteCategory(Long id){
+        System.out.println("Service calling deleteCategory ==>");
+        Category cat = categoryRepository.findByIdAndUserId(id, CategoryService.getCurrentLoggedInUser().getId());
+
+        if(cat == null){
             throw new InformationNotFoundException("Category with id "+ id+ " doesnt exist.");
         }else{
             categoryRepository.deleteById(id);

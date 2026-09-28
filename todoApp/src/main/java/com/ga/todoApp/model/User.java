@@ -33,4 +33,7 @@ public class User {
     @JoinColumn(name="profile_id", referencedColumnName = "id")
     private UserProfile userProfile;
 
+    @OneToMany(mappedBy = "user")
+    private List<Category> categoryList;
+
 }

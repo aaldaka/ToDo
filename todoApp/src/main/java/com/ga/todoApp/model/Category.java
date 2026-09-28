@@ -1,5 +1,6 @@
 package com.ga.todoApp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,4 +26,10 @@ public class Category {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "category", orphanRemoval = true) //when a cat is eleted, delete the recipes as well
     private List<Item> itemList;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
+
 }

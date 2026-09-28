@@ -1,8 +1,11 @@
 package com.ga.todoApp.controller;
 
 import com.ga.todoApp.model.Category;
+import com.ga.todoApp.model.User;
+import com.ga.todoApp.security.MyUserDetails;
 import com.ga.todoApp.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,14 +47,13 @@ public class CategoryController {
     }
 
     @PutMapping("/categories/{categoryId}")
-    public Category updateCategory(@PathVariable("categoryId")Long id, @RequestParam(value = "name") String name,
-                                   @RequestParam(value = "description") String desc){
+    public Category updateCategory(@PathVariable("categoryId") Long id, @RequestBody Category categoryObj){
         System.out.println("Service calling updateCategory");
-        return categoryService.updateCategory(id, name, desc);
+        return categoryService.updateCategory(id, categoryObj);
     }
 
     @DeleteMapping("/categories/{categoryId}")
-    public Optional<Category> deleteCategory(@PathVariable(value = "categoryId") Long categoryId) {
+    public Category deleteCategory(@PathVariable(value = "categoryId") Long categoryId) {
         System.out.println("calling deleteCategory");
         return categoryService.deleteCategory(categoryId);
     }
